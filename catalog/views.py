@@ -1,4 +1,5 @@
-from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from .models import Product, ContactInfo
 
@@ -13,8 +14,19 @@ def home(request):
 
 def contacts(request):
     contact = ContactInfo.objects.first()
-    return render(request, 'catalog/contacts.html', {'contact': contact})
 
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+
+
+        # Здесь можно сохранить сообщение в БД или отправить на почту
+
+        messages.success(request, f'Спасибо, {name}, ваше сообщение отправлено!')
+        return redirect('contacts')
+
+    return render(request, 'catalog/contacts.html', {'contact': contact})
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)

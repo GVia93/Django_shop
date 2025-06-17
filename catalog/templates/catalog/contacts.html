@@ -4,6 +4,15 @@
 {% block content %}
 <h1 class="mb-4">Контакты</h1>
 
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
 {% if contact %}
 <div class="mb-4">
     <p><strong>Адрес:</strong> {{ contact.address }}</p>
@@ -17,18 +26,19 @@
 <hr>
 
 <h5 class="mt-4">Форма обратной связи</h5>
-<form>
+<form method="post">
+    {% csrf_token %}
     <div class="mb-3">
         <label for="name" class="form-label">Имя</label>
-        <input type="text" class="form-control" id="name" placeholder="Введите ваше имя">
+        <input type="text" class="form-control" id="name" name="name" placeholder="Введите ваше имя">
     </div>
     <div class="mb-3">
         <label for="email" class="form-label">Почта</label>
-        <input type="email" class="form-control" id="email" placeholder="name@example.com">
+        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
     </div>
     <div class="mb-3">
         <label for="message" class="form-label">Сообщение</label>
-        <textarea class="form-control" id="message" rows="3"></textarea>
+        <textarea class="form-control" id="message" name="message" rows="3"></textarea>
     </div>
     <button type="submit" class="btn btn-primary">Отправить</button>
 </form>
