@@ -4,7 +4,7 @@ from .models import Product
 
 
 def home(request):
-    product_list = Product.objects.all()
+    product_list = Product.objects.order_by('-created_at')
     paginator = Paginator(product_list, 6)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
