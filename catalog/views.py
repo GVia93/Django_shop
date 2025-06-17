@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from .models import Product
+from .models import Product, ContactInfo
 
 
 def home(request):
@@ -12,7 +12,8 @@ def home(request):
 
 
 def contacts(request):
-    return render(request, 'catalog/contacts.html')
+    contact = ContactInfo.objects.first()
+    return render(request, 'catalog/contacts.html', {'contact': contact})
 
 
 def product_detail(request, pk):
