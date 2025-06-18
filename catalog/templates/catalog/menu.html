@@ -2,7 +2,7 @@
     <h5 class="text-center text-white">Меню</h5>
     <ul class="nav nav-pills flex-column mb-auto">
         <li><a href="{% url 'home' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Главная</a></li>
-        <li><a href="#" class="nav-link">Каталог</a></li>
+        <li><a href="{% url 'catalog' %}" class="nav-link {% if request.path == '/catalog/' %}active{% endif %}">Каталог</a></li>
         <li><a href="#" class="nav-link">Заказы</a></li>
         <li><a href="{% url 'contacts' %}" class="nav-link {% if request.path == '/contacts/' %}active{% endif %}">Контакты</a></li>
     </ul>

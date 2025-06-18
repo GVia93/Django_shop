@@ -1,7 +1,21 @@
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
-from .models import Product, ContactInfo
+from .models import Product, ContactInfo, Category
+
+
+def catalog_view(request):
+    categories = Category.objects.all()
+    return render(request, 'catalog/catalog.html', {'categories': categories})
+
+
+def category_products(request, category_id):
+    category = get_object_or_404(Category, id=category_id)
+    products = category.products.order_by('-created_at')
+    return render(request, 'catalog/category_products.html', {
+        'category': category,
+        'products': products
+    })
 
 
 def home(request):
