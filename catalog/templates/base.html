@@ -11,7 +11,7 @@
             min-height: 100vh;
         }
         .sidebar {
-            width: 250px;
+            width: 150px;
             background-color: #1E1E2F;
             padding-top: 20px;
         }
@@ -26,13 +26,18 @@
             flex-grow: 1;
             padding: 2rem;
         }
+        .container {
+            max-width: 960px;
+        }
     </style>
 </head>
 <body>
     {% include 'catalog/menu.html' %}
 
     <div class="main-content">
-        {% block content %}{% endblock %}
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
