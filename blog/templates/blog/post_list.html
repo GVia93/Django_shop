@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Блог{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Блог</h1>
+
+<a href="{% url 'post_create' %}" class="btn btn-primary mb-3">Создать запись</a>
+
+{% if posts %}
+  <div class="list-group">
+    {% for post in posts %}
+      <a href="{% url 'post_detail' post.pk %}" class="list-group-item list-group-item-action">
+        <h5 class="mb-1">{{ post.title }}</h5>
+        <small>Просмотров: {{ post.views }} | {{ post.created_at|date:"d.m.Y H:i" }}</small>
+        <p class="mb-1 mt-2">{{ post.content|truncatechars:150 }}</p>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>Пока нет записей.</p>
+{% endif %}
+{% endblock %}
