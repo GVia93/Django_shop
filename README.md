@@ -2,12 +2,27 @@
 
 Учебный интернет-магазин на Django. Разрабатывается поэтапно в рамках курса, с соблюдением GitFlow и PostgreSQL.
 
+## Возможности
+
+- Каталог товаров с категориями
+- Детальная страница товара
+- Постраничный вывод товаров
+- Обратная связь (форма + сообщение)
+- Полноценный блог:
+  - создание, просмотр, редактирование, удаление записей
+  - отображаются только опубликованные статьи
+  - счётчик просмотров
+- Админка для управления товарами, категориями и статьями
+- Использование `base.html` и `menu.html`
+- Подключение Bootstrap 5
+
 ## Установка
 
 ```bash
-git clone https://github.com/GVia93/Django_shop.git
-cd django-shop
-python -m venv venv
+git clone ссылка на репозитлоий
+cd django_shop
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -16,35 +31,28 @@ pip install -r requirements.txt
 Создайте файл `.env` в корне проекта:
 
 ```env
-SECRET_KEY=your_secret_key
+SECRET_KEY=ваш_секретный_ключ
 DEBUG=True
-
-NAME=django_shop
-USER=postgres
-PASSWORD=your_password
+NAME=имя_бд
+USER=пользователь_бд
+PASSWORD=пароль
 HOST=localhost
 PORT=5432
 ```
 
-## Запуск
+## Миграции и запуск
 
 ```bash
+python manage.py makemigrations
+python manage.py migrate
 python manage.py runserver
 ```
 
-## Основные модели
+## Создание суперпользователя
 
-### Category
-- name — наименование
-- description — описание
-
-### Product
-- name — наименование
-- description — описание
-- image — изображение
-- category — связь с Category
-- price — цена
-- created_at / updated_at — временные метки
+```bash
+python manage.py createsuperuser
+```
 
 ## Кастомные команды
 
@@ -55,14 +63,18 @@ python manage.py load_test_data
 
 ## Структура проекта
 
-- `catalog/` — приложение с маршрутами, шаблонами и контроллерами
-- `config/` — конфигурация проекта
-- `templates/` — HTML-шаблоны
-- `static/` — Bootstrap и статические файлы
-
-## Маршруты
-
-| Адрес             | Описание                |
-|-------------------|-------------------------|
-| `/`               | Главная страница        |
-| `/contacts/`      | Страница с контактами   |
+Django_shop/
+├── blog/                                                       ← приложение блога
+│   ├── templates/blog/ (post_list, detail, form, delete)
+│   ├── models.py, views.py, urls.py, admin.py
+├── catalog/                                                    ← приложение каталога
+│   ├── templates/catalog/ (home, contacts, catalog, product_detail)
+│   ├── models.py, views.py, urls.py, admin.py
+│   └── templates/base.html, menu.html
+├── config/ (settings.py, urls.py, wsgi.py)                     ← основной проект Django
+├── media/                                                      ← загружаемые файлы
+├── static/                                                     ← Bootstrap и стили
+├── manage.py
+├── requirements.txt
+├── .env
+└── README.md
