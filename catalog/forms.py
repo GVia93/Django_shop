@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 
 from .models import Product
 
@@ -70,3 +71,14 @@ class ProductForm(forms.ModelForm):
         if price is not None and price < 0:
             raise forms.ValidationError("Цена не может быть отрицательной.")
         return price
+
+    def clea_image(self):
+        """
+        Проверяет формат изображения.
+        """
+        image = self.cleaned_data.get('image')
+        if image:
+            if image.size > 5 * 1024 * 1024:
+                raise ValidationError('Размер сообщения не должен превышать 5 МБ.')
+            if not image.content_type in ['image/jpeg', 'image/png']:
+                raise ValidationError('Изображение должно быть в формате JPEG или PNG.')
