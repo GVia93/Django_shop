@@ -35,6 +35,10 @@ class ProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs["class"] = "form-control"
+        self.fields['name'].widget.attrs['placeholder'] = "Введите название продукта."
+        self.fields['description'].widget.attrs['placeholder'] = "Введите описание продукта."
+        self.fields['image'].help_text = ("Размер сообщения не должен превышать 5 МБ.\n"
+                                                          'Изображение должно быть в формате JPEG или PNG.')
 
     def clean_name(self):
         """
