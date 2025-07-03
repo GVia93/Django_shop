@@ -27,6 +27,14 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = "__all__"
 
+    def __init__(self, *args, **kwargs):
+        """
+        Добавляет CSS-классы Bootstrap ко всем полям формы.
+        """
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs["class"] = "form-control"
+
     def clean_name(self):
         """
         Проверяет отсутствие запрещённых слов в поле 'name'.
