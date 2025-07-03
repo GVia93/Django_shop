@@ -3,7 +3,8 @@ from django.db import models
 
 class Category(models.Model):
     """
-    Модель категории товара.
+    Категория товара.
+    Хранит информацию о наименовании и описании категории.
     """
 
     name = models.CharField(max_length=150, verbose_name="Наименование")
@@ -14,12 +15,18 @@ class Category(models.Model):
         verbose_name_plural = "Категории"
 
     def __str__(self):
+        """
+        Возвращает строковое представление категории.
+        """
         return self.name
 
 
 class Product(models.Model):
     """
-    Модель продукта (товара) в каталоге.
+    Продукт каталога.
+
+    Содержит сведения о товаре: название, описание, изображение, категория,
+    цена, дата создания и последнего обновления.
     """
 
     name = models.CharField(max_length=150, verbose_name="Наименование")
@@ -42,10 +49,18 @@ class Product(models.Model):
         verbose_name_plural = "Продукты"
 
     def __str__(self):
+        """
+        Возвращает строковое представление продукта.
+        """
         return self.name
 
 
 class ContactInfo(models.Model):
+    """
+    Контактная информация компании или продавца.
+    Содержит адрес, телефон и email.
+    """
+
     address = models.CharField(max_length=255, verbose_name="Адрес")
     phone = models.CharField(max_length=50, verbose_name="Телефон")
     email = models.EmailField(verbose_name="Email")
@@ -55,4 +70,7 @@ class ContactInfo(models.Model):
         verbose_name_plural = "Контактная информация"
 
     def __str__(self):
+        """
+        Возвращает строковое представление контактной информации.
+        """
         return f"{self.address} | {self.phone}"
