@@ -6,7 +6,7 @@
 <ul class="list-group">
   {% for cat in categories %}
     <li class="list-group-item">
-      <a href="{% url 'category_products' cat.id %}">{{ cat.name }}</a>
+      <a href="{% url 'catalog:category_products' cat.id %}">{{ cat.name }}</a>
     </li>
   {% empty %}
     <li class="list-group-item">Нет доступных категорий.</li>

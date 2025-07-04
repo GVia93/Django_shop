@@ -5,22 +5,22 @@
 <h1 class="mb-4">Контакты</h1>
 
 {% if messages %}
-  {% for message in messages %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
-    </div>
-  {% endfor %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+        </div>
+    {% endfor %}
 {% endif %}
 
 {% if contact %}
-<div class="mb-4">
-    <p><strong>Адрес:</strong> {{ contact.address }}</p>
-    <p><strong>Телефон:</strong> {{ contact.phone }}</p>
-    <p><strong>Email:</strong> {{ contact.email }}</p>
-</div>
+    <div class="mb-4">
+        <p><strong>Адрес:</strong> {{ contact.address }}</p>
+        <p><strong>Телефон:</strong> {{ contact.phone }}</p>
+        <p><strong>Email:</strong> {{ contact.email }}</p>
+    </div>
 {% else %}
-<p>Контактные данные пока не добавлены.</p>
+    <p>Контактные данные пока не добавлены.</p>
 {% endif %}
 
 <hr>
