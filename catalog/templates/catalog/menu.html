@@ -6,14 +6,24 @@
         <li><a href="{% url 'catalog:product_list' %}" class="nav-link {% if request.path == '/products/' %}active{% endif %}">Продукты</a></li>
         <li><a href="{% url 'catalog:contacts' %}" class="nav-link {% if request.path == '/contacts/' %}active{% endif %}">Контакты</a></li>
     </ul>
+
     <hr>
     <div class="dropdown">
         <a href="#" class="d-block text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
             Пользователь
         </a>
         <ul class="dropdown-menu text-small shadow">
-            <li><a class="dropdown-item" href="#">Профиль</a></li>
-            <li><a class="dropdown-item" href="#">Выход</a></li>
+            {% if request.user.is_authenticated %}
+                <li>
+                    <form action="{% url 'users:logout' %}" method="post" class="px-3">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link p-0 text-start">Выйти</button>
+                    </form>
+                </li>
+            {% else %}
+                <li><a class="dropdown-item" href="{% url 'users:login' %}">Войти</a></li>
+                <li><a class="dropdown-item" href="{% url 'users:register' %}">Регистрация</a></li>
+            {% endif %}
         </ul>
     </div>
 </div>
