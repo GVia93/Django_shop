@@ -3,12 +3,14 @@
 
 {% block content %}
 <h1>Список продуктов</h1>
+<a href="{% url 'catalog:product_create' %}" class="btn btn-success">Добавить продукт</a>
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Наименование</th>
             <th>Категория</th>
             <th>Цена</th>
+            <th>Редактировать</th>
         </tr>
     </thead>
     <tbody>
