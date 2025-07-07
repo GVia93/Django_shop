@@ -59,3 +59,20 @@ class CustomAuthenticationForm(AuthenticationForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs["class"] = "form-control"
+
+
+class ProfileUpdateForm(forms.ModelForm):
+    """
+    Форма редактирования профиля.
+    """
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "avatar",
+        ]

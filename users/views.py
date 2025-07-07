@@ -1,12 +1,34 @@
 from django.conf import settings
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
 from django.urls import reverse_lazy
-from django.views.generic import CreateView
+from django.views.generic import CreateView, UpdateView
 
-from .forms import CustomAuthenticationForm, CustomUserCreateForm
+from .forms import (CustomAuthenticationForm, CustomUserCreateForm,
+                    ProfileUpdateForm)
 from .models import CustomUser
+
+
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Представление для редактирования профиля текущего пользователя.
+    Доступно только авторизованным пользователям.
+    Использует форму ProfileUpdateForm и обновляет модель CustomUser.
+    После сохранения перенаправляет на главную страницу.
+    """
+
+    model = CustomUser
+    form_class = ProfileUpdateForm
+    template_name = "users/profile.html"
+    success_url = reverse_lazy("catalog:home")
+
+    def get_object(self, queryset=None):
+        """
+        Возвращает объект текущего пользователя.
+        """
+        return self.request.user
 
 
 class CustomRegisterView(CreateView):
