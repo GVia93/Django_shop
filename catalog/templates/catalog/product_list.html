@@ -11,6 +11,8 @@
             <th>Категория</th>
             <th>Цена</th>
             <th>Редактировать</th>
+            <th>Редактировать</th>
+            <th>Редактировать</th>
         </tr>
     </thead>
     <tbody>
@@ -27,7 +29,17 @@
                 <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-sm btn-warning">Редактировать</a>
             </td>
             <td>
-                <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-sm btn-warning">Удалить</a>
+                {% if perms.catalog.can_unpublish_product %}
+                    <form action="{% url 'catalog:product_unpublish' product.pk %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit">Снять с публикации</button>
+                    </form>
+                {% endif %}
+            </td>
+            <td>
+                {% if user == product.owner or user.has_perm.catalog.delete_product %}
+                    <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-sm btn-warning">Удалить</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

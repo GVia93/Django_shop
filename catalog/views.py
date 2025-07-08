@@ -1,13 +1,43 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  TemplateView, UpdateView)
+                                  TemplateView, UpdateView, View)
 
 from .forms import ProductForm
 from .models import Category, ContactInfo, Product
+
+
+class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """
+    Представление для снятия продукта с публикации.
+    Доступно только авторизованным пользователям с соответствующим правом.
+    """
+    permission_required = 'catalog.can_unpublish_product'
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        product.is_published = False
+        product.save()
+        return redirect('catalog:product_list')
+
+
+class ProductDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """
+    Представление для удаления продукта.
+    Разрешено владельцу продукта или пользователю с правом 'delete_product'.
+    """
+    model = Product
+    success_url = reverse_lazy('catalog:product_list')
+    permission_required = 'catalog.delete_product'
+
+    def has_permission(self):
+        product = self.get_object()
+        return (
+            self.request.user == product.owner
+            or self.request.user.has_perm('catalog.delete_product')
+        )
 
 
 class HomeView(ListView):
@@ -93,16 +123,6 @@ class ProductListView(ListView):
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_list.html"
-
-
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
-    """
-    Удаление продукта с подтверждением.
-    """
-
-    model = Product
-    template_name = "catalog/product_confirm_delete.html"
-    success_url = reverse_lazy("catalog:product_list")
 
 
 class CatalogView(View):
