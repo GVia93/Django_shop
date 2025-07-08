@@ -17,6 +17,18 @@ class CustomUserCreateForm(UserCreationForm):
             "password2",
         )
 
+    def save(self, commit=True):
+        """
+        Сохраняет пользователя, устанавливая username равным email, если username не задан.
+        Используется при регистрации, чтобы избежать ошибок уникальности.
+        """
+        user = super().save(commit=False)
+        if not user.username:
+            user.username = self.cleaned_data.get("email")
+        if commit:
+            user.save()
+        return user
+
     def __init__(self, *args, **kwargs):
         """
         Добавляет Bootstrap-классы ко всем полям формы.

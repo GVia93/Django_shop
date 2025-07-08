@@ -26,7 +26,9 @@
             <td>{{ product.category }}</td>
             <td>{{ product.price }}</td>
             <td>
-                <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-sm btn-warning">Редактировать</a>
+                {% if user == product.owner %}
+                    <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-sm btn-warning">Редактировать</a>
+                {% endif %}
             </td>
             <td>
                 {% if perms.catalog.can_unpublish_product %}
@@ -38,7 +40,7 @@
             </td>
             <td>
                 {% if user == product.owner or user.has_perm.catalog.delete_product %}
-                    <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-sm btn-warning">Удалить</a>
+                    <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-sm btn-danger">Удалить</a>
                 {% endif %}
             </td>
         </tr>
