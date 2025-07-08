@@ -76,7 +76,7 @@ class ProductForm(forms.ModelForm):
             raise forms.ValidationError("Цена не может быть отрицательной.")
         return price
 
-    def clea_image(self):
+    def clean_image(self):
         """
         Проверяет формат изображения.
         """

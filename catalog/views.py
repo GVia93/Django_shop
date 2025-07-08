@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views import View
@@ -62,7 +63,7 @@ class ProductDetailView(DetailView):
     context_object_name = "product"
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(LoginRequiredMixin, CreateView):
     """
     Создание нового продукта.
     """
@@ -73,7 +74,7 @@ class ProductCreateView(CreateView):
     success_url = reverse_lazy("catalog:home")
 
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(LoginRequiredMixin, UpdateView):
     """
     Редактирование существующего продукты.
     """
@@ -94,7 +95,7 @@ class ProductListView(ListView):
     template_name = "catalog/product_list.html"
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     """
     Удаление продукта с подтверждением.
     """
