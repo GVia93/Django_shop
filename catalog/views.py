@@ -11,6 +11,7 @@ from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
 
 from .forms import ProductForm
 from .models import Category, ContactInfo, Product
+from .services import get_products_by_category_id
 
 
 class ProductPublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
@@ -189,19 +190,26 @@ class CatalogView(View):
         return render(request, "catalog/catalog.html", {"categories": categories})
 
 
-class CategoryProductsView(View):
+class CategoryProductListView(ListView):
     """
-    Список продуктов в выбранной категории.
+    Представление для отображения списка опубликованных продуктов,
+    принадлежащих определённой категории.
     """
 
-    def get(self, request, category_id):
+    template_name = "catalog/category_products.html"
+    context_object_name = "products"
+
+    def get_queryset(self):
         """
-        Выводит все продукты, относящиеся к данной категории.
+        Возвращает QuerySet продуктов, отфильтрованных по категории и опубликованному статусу.
         """
-        category = get_object_or_404(Category, id=category_id)
-        products = category.products.order_by("-created_at")
-        return render(
-            request,
-            "catalog/category_products.html",
-            {"category": category, "products": products},
-        )
+        return get_products_by_category_id(self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        """
+        Добавляет объект категории в контекст шаблона.
+        """
+        context = super().get_context_data(**kwargs)
+        context["category"] = Category.objects.get(id=self.kwargs.get("pk"))
+        return context
+

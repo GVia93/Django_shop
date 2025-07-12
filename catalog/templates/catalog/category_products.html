@@ -1,27 +1,25 @@
 {% extends 'base.html' %}
-
 {% block title %}{{ category.name }}{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">{{ category.name }}</h1>
+<h1>Категория: {{ category.name }}</h1>
 
 <div class="row row-cols-1 row-cols-md-3 g-4">
     {% for product in products %}
-    <div class="col">
-        <div class="card text-center h-100">
-            {% if product.image %}
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ product.name }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ product.price }} ₽</h6>
-                <p class="card-text">{{ product.description|truncatechars:100 }}</p>
-                <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-outline-primary">Подробнее</a>
+        <div class="col">
+            <div class="card h-100">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description|truncatechars:100 }}</p>
+                    <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-primary">Подробнее</a>
+                </div>
             </div>
         </div>
-    </div>
+    {% empty %}
+        <p>В данной категории пока нет продуктов.</p>
     {% endfor %}
 </div>
-
-<a href="{% url 'catalog:catalog' %}" class="btn btn-secondary mt-4">Назад к категориям</a>
 {% endblock %}
