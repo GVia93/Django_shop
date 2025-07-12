@@ -4,6 +4,8 @@ from django.contrib.auth.mixins import (LoginRequiredMixin,
                                         UserPassesTestMixin)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   TemplateView, UpdateView, View)
 
@@ -22,7 +24,7 @@ class ProductPublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
     def post(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         product.is_published = True
-        product.save(update_fields=['is_published'])
+        product.save(update_fields=["is_published"])
         return redirect("catalog:product_list")
 
 
@@ -37,7 +39,7 @@ class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
     def post(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         product.is_published = False
-        product.save(update_fields=['is_published'])
+        product.save(update_fields=["is_published"])
         return redirect("catalog:product_list")
 
 
@@ -112,6 +114,7 @@ class ContactView(TemplateView):
         return self.get(request, *args, **kwargs)
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ProductDetailView(DetailView):
     """
     Страница с подробной информацией о продукте.
