@@ -22,7 +22,7 @@ class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
     def post(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         product.is_published = False
-        product.save()
+        product.save(update_fields=['is_published'])
         return redirect("catalog:product_list")
 
 

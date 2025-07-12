@@ -7,6 +7,7 @@ class CustomUser(AbstractUser):
     Класс представления пользователя.
     """
 
+    username = None
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True, verbose_name='Номер телефона')
     first_name = models.CharField(max_length=50, blank=True, null=True, verbose_name='Имя')
