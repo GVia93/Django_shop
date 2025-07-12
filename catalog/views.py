@@ -11,6 +11,21 @@ from .forms import ProductForm
 from .models import Category, ContactInfo, Product
 
 
+class ProductPublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """
+    Представление для публикации продукта.
+    Доступно только авторизованным пользователям с соответствующим правом.
+    """
+
+    permission_required = "catalog.can_unpublish_product"
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        product.is_published = True
+        product.save(update_fields=['is_published'])
+        return redirect("catalog:product_list")
+
+
 class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
     """
     Представление для снятия продукта с публикации.
@@ -57,6 +72,14 @@ class HomeView(ListView):
     context_object_name = "page_obj"
     paginate_by = 6
     ordering = ["-created_at"]
+
+    def get_queryset(self):
+        """
+        Возвращает QuerySet с опубликованными продуктами.
+        Фильтрует объекты модели Product, чтобы отображались только те,
+        у которых флаг is_published установлен в True.
+        """
+        return Product.objects.filter(is_published=True)
 
 
 class ContactView(TemplateView):

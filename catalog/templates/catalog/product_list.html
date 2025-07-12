@@ -10,9 +10,6 @@
             <th>Наименование</th>
             <th>Категория</th>
             <th>Цена</th>
-            <th>Редактировать</th>
-            <th>Редактировать</th>
-            <th>Редактировать</th>
         </tr>
     </thead>
     <tbody>
@@ -30,14 +27,21 @@
                     <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-sm btn-warning">Редактировать</a>
                 {% endif %}
             </td>
-            <td>
-                {% if perms.catalog.can_unpublish_product %}
-                    <form action="{% url 'catalog:product_unpublish' product.pk %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit">Снять с публикации</button>
-                    </form>
-                {% endif %}
-            </td>
+            {% if perms.catalog.can_unpublish_product %}
+                <td>
+                    {% if product.is_published %}
+                        <form action="{% url 'catalog:product_unpublish' product.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-warning" >Снять с публикации</button>
+                        </form>
+                    {% else %}
+                        <form action="{% url 'catalog:product_publish' product.pk %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-success">Опубликовать</button>
+                        </form>
+                    {% endif %}
+                </td>
+            {% endif %}
             <td>
                 {% if user == product.owner or user.has_perm.catalog.delete_product %}
                     <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-sm btn-danger">Удалить</a>
