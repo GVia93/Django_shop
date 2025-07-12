@@ -17,6 +17,7 @@ class CustomUserCreateForm(UserCreationForm):
             "password2",
         )
 
+
     def __init__(self, *args, **kwargs):
         """
         Добавляет Bootstrap-классы ко всем полям формы.

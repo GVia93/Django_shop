@@ -1,13 +1,65 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.mixins import (LoginRequiredMixin,
+                                        PermissionRequiredMixin,
+                                        UserPassesTestMixin)
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  TemplateView, UpdateView)
+                                  TemplateView, UpdateView, View)
 
 from .forms import ProductForm
 from .models import Category, ContactInfo, Product
+
+
+class ProductPublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """
+    Представление для публикации продукта.
+    Доступно только авторизованным пользователям с соответствующим правом.
+    """
+
+    permission_required = "catalog.can_unpublish_product"
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        product.is_published = True
+        product.save(update_fields=['is_published'])
+        return redirect("catalog:product_list")
+
+
+class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """
+    Представление для снятия продукта с публикации.
+    Доступно только авторизованным пользователям с соответствующим правом.
+    """
+
+    permission_required = "catalog.can_unpublish_product"
+
+    def post(self, request, pk):
+        product = get_object_or_404(Product, pk=pk)
+        product.is_published = False
+        product.save(update_fields=['is_published'])
+        return redirect("catalog:product_list")
+
+
+class ProductDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    """
+    Представление для удаления продукта.
+    Разрешено владельцу продукта или пользователю с правом 'delete_product'.
+    """
+
+    model = Product
+    success_url = reverse_lazy("catalog:product_list")
+    permission_required = "catalog.delete_product"
+
+    def has_permission(self):
+        """
+        Проверяет, имеет ли пользователь право удалить продукт.
+        Доступ разрешён владельцу продукта или пользователю с правом 'catalog.delete_product'.
+        """
+        product = self.get_object()
+        return self.request.user == product.owner or self.request.user.has_perm(
+            "catalog.delete_product"
+        )
 
 
 class HomeView(ListView):
@@ -20,6 +72,14 @@ class HomeView(ListView):
     context_object_name = "page_obj"
     paginate_by = 6
     ordering = ["-created_at"]
+
+    def get_queryset(self):
+        """
+        Возвращает QuerySet с опубликованными продуктами.
+        Фильтрует объекты модели Product, чтобы отображались только те,
+        у которых флаг is_published установлен в True.
+        """
+        return Product.objects.filter(is_published=True)
 
 
 class ContactView(TemplateView):
@@ -65,7 +125,9 @@ class ProductDetailView(DetailView):
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
     """
-    Создание нового продукта.
+    Представление для создания нового продукта.
+    Доступно только авторизованным пользователям.
+    Поле 'owner' автоматически заполняется текущим пользователем.
     """
 
     model = Product
@@ -73,16 +135,32 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
     template_name = "catalog/product_form.html"
     success_url = reverse_lazy("catalog:home")
 
+    def form_valid(self, form):
+        """
+        Устанавливает текущего пользователя как владельца продукта
+        перед сохранением формы.
+        """
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
+
+class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     """
-    Редактирование существующего продукты.
+    Представление для редактирования продукта.
+    Доступно только владельцу продукта.
     """
 
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_form.html"
     success_url = reverse_lazy("catalog:product_list")
+
+    def test_func(self):
+        """
+        Проверяет, является ли текущий пользователь владельцем объекта.
+        Используется для ограничения доступа к редактированию или удалению.
+        """
+        return self.request.user == self.get_object().owner
 
 
 class ProductListView(ListView):
@@ -93,16 +171,6 @@ class ProductListView(ListView):
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_list.html"
-
-
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
-    """
-    Удаление продукта с подтверждением.
-    """
-
-    model = Product
-    template_name = "catalog/product_confirm_delete.html"
-    success_url = reverse_lazy("catalog:product_list")
 
 
 class CatalogView(View):
