@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import (LoginRequiredMixin,
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
+from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   TemplateView, UpdateView, View)
@@ -78,11 +79,15 @@ class HomeView(ListView):
 
     def get_queryset(self):
         """
-        Возвращает QuerySet с опубликованными продуктами.
-        Фильтрует объекты модели Product, чтобы отображались только те,
-        у которых флаг is_published установлен в True.
+        Возвращает QuerySet опубликованных продуктов.
+        Использует низкоуровневое кеширование для снижения нагрузки на базу данных.
+        Список продуктов сохраняется в кеш на 15 минут.
         """
-        return Product.objects.filter(is_published=True)
+        queryset = cache.get("home")
+        if queryset is None:
+            queryset = Product.objects.filter(is_published=True).order_by("-created_at")
+            cache.set("home", queryset, 60 * 15)
+        return queryset
 
 
 class ContactView(TemplateView):
@@ -169,11 +174,10 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class ProductListView(ListView):
     """
-    Список всех продуктов.
+    Представление для отображения списка опубликованных продуктов.
     """
 
     model = Product
-    form_class = ProductForm
     template_name = "catalog/product_list.html"
 
 
