@@ -4,11 +4,15 @@ from django.contrib.auth.mixins import (LoginRequiredMixin,
                                         UserPassesTestMixin)
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
                                   TemplateView, UpdateView, View)
 
 from .forms import ProductForm
 from .models import Category, ContactInfo, Product
+from .services import get_products_by_category_id
 
 
 class ProductPublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
@@ -22,7 +26,7 @@ class ProductPublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
     def post(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         product.is_published = True
-        product.save(update_fields=['is_published'])
+        product.save(update_fields=["is_published"])
         return redirect("catalog:product_list")
 
 
@@ -37,7 +41,7 @@ class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
     def post(self, request, pk):
         product = get_object_or_404(Product, pk=pk)
         product.is_published = False
-        product.save(update_fields=['is_published'])
+        product.save(update_fields=["is_published"])
         return redirect("catalog:product_list")
 
 
@@ -75,11 +79,15 @@ class HomeView(ListView):
 
     def get_queryset(self):
         """
-        Возвращает QuerySet с опубликованными продуктами.
-        Фильтрует объекты модели Product, чтобы отображались только те,
-        у которых флаг is_published установлен в True.
+        Возвращает QuerySet опубликованных продуктов.
+        Использует низкоуровневое кеширование для снижения нагрузки на базу данных.
+        Список продуктов сохраняется в кеш на 15 минут.
         """
-        return Product.objects.filter(is_published=True)
+        queryset = cache.get("home")
+        if queryset is None:
+            queryset = Product.objects.filter(is_published=True).order_by("-created_at")
+            cache.set("home", queryset, 60 * 15)
+        return queryset
 
 
 class ContactView(TemplateView):
@@ -112,6 +120,7 @@ class ContactView(TemplateView):
         return self.get(request, *args, **kwargs)
 
 
+@method_decorator(cache_page(60 * 15), name="dispatch")
 class ProductDetailView(DetailView):
     """
     Страница с подробной информацией о продукте.
@@ -165,11 +174,10 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class ProductListView(ListView):
     """
-    Список всех продуктов.
+    Представление для отображения списка опубликованных продуктов.
     """
 
     model = Product
-    form_class = ProductForm
     template_name = "catalog/product_list.html"
 
 
@@ -186,19 +194,26 @@ class CatalogView(View):
         return render(request, "catalog/catalog.html", {"categories": categories})
 
 
-class CategoryProductsView(View):
+class CategoryProductListView(ListView):
     """
-    Список продуктов в выбранной категории.
+    Представление для отображения списка опубликованных продуктов,
+    принадлежащих определённой категории.
     """
 
-    def get(self, request, category_id):
+    template_name = "catalog/category_products.html"
+    context_object_name = "products"
+
+    def get_queryset(self):
         """
-        Выводит все продукты, относящиеся к данной категории.
+        Возвращает QuerySet продуктов, отфильтрованных по категории и опубликованному статусу.
         """
-        category = get_object_or_404(Category, id=category_id)
-        products = category.products.order_by("-created_at")
-        return render(
-            request,
-            "catalog/category_products.html",
-            {"category": category, "products": products},
-        )
+        return get_products_by_category_id(self.kwargs["pk"])
+
+    def get_context_data(self, **kwargs):
+        """
+        Добавляет объект категории в контекст шаблона.
+        """
+        context = super().get_context_data(**kwargs)
+        context["category"] = Category.objects.get(id=self.kwargs.get("pk"))
+        return context
+
